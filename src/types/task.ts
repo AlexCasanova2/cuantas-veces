@@ -69,4 +69,5 @@ export interface TaskWithProgress extends Task {
     progress: number;
     count: number;
     completedAchievementIds: number[];
+    category?: Category;
 } 

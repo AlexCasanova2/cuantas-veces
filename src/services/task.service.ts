@@ -11,7 +11,20 @@ export async function fetchTasks() {
     `)
     .order('created_at', { ascending: false });
 
-  if (error) throw error;
+  if (error) {
+    console.error('Error al obtener tareas:', error);
+    throw error;
+  }
+
+  // Verificar que los logros se están obteniendo correctamente
+  data.forEach(task => {
+    if (!task.achievements) {
+      console.warn(`Tarea ${task.id} no tiene logros asociados`);
+    } else {
+      console.log(`Tarea ${task.id} tiene ${task.achievements.length} logros:`, task.achievements);
+    }
+  });
+
   return data as Task[];
 }
 

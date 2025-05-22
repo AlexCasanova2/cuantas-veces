@@ -1,8 +1,8 @@
 <template>
   <div class="min-h-screen bg-grayLight flex flex-col">
-    <BaseCard class="max-w-2xl w-full mx-auto px-6 pt-8 pb-6 mt-0 mb-20 rounded-t-none">
+    <BaseCard class="max-w-2xl w-full mx-auto mt-0 mb-20 rounded-t-none">
       <!-- Header -->
-      <header class="mb-6">
+      <header class="mb-6 px-6 pt-8">
         <div class="flex justify-between items-center">
           <div>
             <h1 class="text-2xl font-bold text-dark">Hola de nuevo,</h1>
@@ -33,24 +33,26 @@
         </div>
       </header>
 
+
       <!-- Contenido principal -->
-      <main>
+      <main class="pb-6">
         <!-- Tu espacio de trabajo -->
-        <section class="mb-8">
+        <section class="mb-8 px-6">
           <div class="flex justify-between items-center mb-4">
             <h3 class="text-xl font-bold text-dark">¿Algo que añadir?</h3>
             <BaseButton color="accent" class="text-sm">Ver todo</BaseButton>
           </div>
-          <div class="overflow-x-auto">
-            <div class="flex space-x-4 min-w-[350px]">
+          <div class="overflow-x-auto -mx-6 px-6">
+            <div class="flex space-x-6 pb-4 flex-nowrap">
               <TaskCardCarrusel v-for="task in randomTasksList" :key="task.id" :task="task" @increment="handleIncrement"
-                @navigate-to-detail="navigateToTaskDetail" />
+                @navigate-to-detail="navigateToTaskDetail" class="flex-shrink-0" />
             </div>
           </div>
         </section>
 
+
         <!-- Últimas tareas personales -->
-        <section>
+        <section class="px-6">
           <div class="flex justify-between items-center mb-4">
             <h3 class="text-xl font-bold text-dark">Últimas tareas personales</h3>
             <router-link to="/tasks">
