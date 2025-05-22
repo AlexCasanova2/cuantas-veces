@@ -74,26 +74,21 @@
               Categoría
             </label>
             <div class="flex gap-2">
-              <select
-                v-model="taskForm.category_id"
+              <select v-model="taskForm.category_id"
                 class="flex-grow px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                required
-              >
+                required>
                 <option value="">Selecciona una categoría</option>
-                <option v-for="category in categoryStore.categories" 
-                        :key="category.id" 
-                        :value="category.id"
-                        :style="{ color: category.color }">
+                <option v-for="category in categoryStore.categories" :key="category.id" :value="category.id"
+                  :style="{ color: category.color }">
                   {{ category.name }}
                 </option>
               </select>
-              <button
-                type="button"
-                @click="showCategoryManager = true"
-                class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors dark:bg-gray-700 dark:text-gray-300"
-              >
+              <button type="button" @click="showCategoryManager = true"
+                class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors dark:bg-gray-700 dark:text-gray-300">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                  <path fill-rule="evenodd"
+                    d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                    clip-rule="evenodd" />
                 </svg>
               </button>
             </div>
@@ -160,8 +155,10 @@
         <div class="p-4 border-b dark:border-gray-700">
           <div class="flex justify-between items-center">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Gestionar Categorías</h3>
-            <button @click="showCategoryManager = false" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <button @click="showCategoryManager = false"
+              class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -219,7 +216,7 @@ async function handleSubmit() {
   try {
     if (editingTask.value) {
       // Solo actualizamos la tarea si ha cambiado
-      const hasTaskChanged = 
+      const hasTaskChanged =
         taskForm.value.title !== editingTask.value.title ||
         taskForm.value.description !== editingTask.value.description ||
         taskForm.value.category_id !== editingTask.value.category_id;
