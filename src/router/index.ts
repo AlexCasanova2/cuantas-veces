@@ -6,6 +6,7 @@ import AdminView from '../views/AdminView.vue'
 import TaskDetailView from '../views/TaskDetailView.vue'
 import ProfileView from '../views/ProfileView.vue'
 import AchievementsView from '../views/AchievementsView.vue'
+import GamificationView from '../views/GamificationView.vue'
 import { useUserStore } from '../stores/user.store'
 import { useAuthStore } from '../stores/auth.store'
 
@@ -62,6 +63,12 @@ const router = createRouter({
       path: '/achievements',
       name: 'achievements',
       component: AchievementsView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/gamification',
+      name: 'gamification',
+      component: GamificationView,
       meta: { requiresAuth: true }
     }
   ],
