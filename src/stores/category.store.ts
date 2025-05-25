@@ -1,11 +1,6 @@
 import { defineStore } from 'pinia';
 import * as categoryService from '../services/category.service';
-
-export interface Category {
-  id: number;
-  name: string;
-  color: string;
-}
+import type { Category } from '../types/task';
 
 export const useCategoryStore = defineStore('category', {
   state: () => ({

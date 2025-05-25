@@ -5,6 +5,7 @@ export interface Task {
     category_id: number;
     created_at: string;
     updated_at: string;
+    state: 'draft' | 'published' | 'deleted';
     achievements?: Achievement[];
 }
 
@@ -13,7 +14,8 @@ export interface Achievement {
     task_id: number;
     title: string;
     description: string;
-    requirement: string;
+    requirement: number;
+    xp_reward: number;
     created_at: string;
     updated_at: string;
 }
@@ -43,11 +45,13 @@ export interface CreateTaskDTO {
     title: string;
     description: string;
     category_id: number;
+    state: 'draft' | 'published' | 'deleted';
     achievements: {
         id?: number;
         title: string;
         description: string | null;
         requirement: number;
+        xp_reward: number;
     }[];
 }
 

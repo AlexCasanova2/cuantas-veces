@@ -7,8 +7,19 @@ interface Profile {
     id: string;
     name: string;
     role: 'admin' | 'user';
+    bio?: string;
+    avatar_url?: string;
+    xp: number;
+    level: number;
     created_at: string;
     updated_at: string;
+}
+
+interface UpdateProfileDTO {
+    name?: string;
+    bio?: string;
+    avatar?: File;
+    removeAvatar?: boolean;
 }
 
 export const useUserStore = defineStore('user', () => {
@@ -100,27 +111,120 @@ export const useUserStore = defineStore('user', () => {
     }
 
     async function checkSession() {
-        try {
             const { data: { session } } = await supabase.auth.getSession();
-            user.value = session?.user ?? null;
+        if (session) {
+            user.value = session.user;
+            await fetchProfile();
+        }
+    }
 
-            if (session?.user) {
-                const { data: profileData, error: profileError } = await supabase
+    async function fetchProfile() {
+        if (!user.value) return;
+
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', user.value.id)
+            .single();
+
+        if (error) {
+            console.error('Error fetching profile:', error);
+            return;
+        }
+
+        profile.value = data;
+    }
+
+    async function updateProfile(updates: UpdateProfileDTO) {
+        if (!user.value) return;
+
+        let avatar_url: string | undefined = profile.value?.avatar_url;
+
+        // Si se solicita eliminar el avatar
+        if (updates.removeAvatar) {
+            avatar_url = undefined;
+        }
+        // Si hay un nuevo avatar, súbelo primero
+        else if (updates.avatar) {
+            try {
+                const fileExt = updates.avatar.name.split('.').pop();
+                const fileName = `${user.value.id}-${Date.now()}.${fileExt}`;
+                
+                // Subir el archivo
+                const { data: uploadData, error: uploadError } = await supabase.storage
+                    .from('avatars')
+                    .upload(fileName, updates.avatar, {
+                        cacheControl: '3600',
+                        upsert: true
+                    });
+
+                if (uploadError) {
+                    console.error('Error uploading avatar:', uploadError);
+                    throw uploadError;
+                }
+
+                // Obtener la URL pública del avatar
+                const { data: { publicUrl } } = supabase.storage
+                    .from('avatars')
+                    .getPublicUrl(fileName);
+
+                avatar_url = publicUrl;
+            } catch (error) {
+                console.error('Error al procesar el avatar:', error);
+                throw error;
+            }
+        }
+
+        try {
+            // Actualizar el perfil
+            const { data, error } = await supabase
                     .from('profiles')
-                    .select('*')
-                    .eq('id', session.user.id)
+                .update({
+                    name: updates.name,
+                    bio: updates.bio,
+                    avatar_url,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', user.value.id)
+                .select()
                     .single();
 
-                if (profileError) throw profileError;
-                profile.value = profileData;
+            if (error) {
+                console.error('Error updating profile:', error);
+                throw error;
             }
 
-            // Iniciar el temporizador de inactividad
-            startInactivityTimer();
+            profile.value = data;
+        } catch (error) {
+            console.error('Error al actualizar el perfil:', error);
+            throw error;
+        }
+    }
 
-            return session;
+    async function addXP(amount: number) {
+        if (!user.value || !profile.value) return;
+
+        try {
+            const newXP = (profile.value.xp || 0) + amount;
+            const newLevel = Math.floor(newXP / 100) + 1; // Cada 100 XP sube un nivel
+
+            const { data, error: updateError } = await supabase
+                .from('profiles')
+                .update({
+                    xp: newXP,
+                    level: newLevel,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', user.value.id)
+                .select()
+                .single();
+
+            if (updateError) throw updateError;
+
+            profile.value = data;
+            return data;
         } catch (e) {
-            error.value = e instanceof Error ? e.message : 'Error al verificar sesión';
+            console.error('Error al añadir XP:', e);
             throw e;
         }
     }
@@ -161,6 +265,9 @@ export const useUserStore = defineStore('user', () => {
         login,
         register,
         logout,
-        checkSession
+        checkSession,
+        fetchProfile,
+        updateProfile,
+        addXP
     };
 });

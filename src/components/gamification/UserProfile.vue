@@ -14,13 +14,11 @@
     <div class="mt-4">
       <div class="flex justify-between text-sm text-gray-600 mb-1">
         <span>{{ userLevel?.current_xp || 0 }} XP</span>
-        <span>{{ userLevel?.xp_to_next_level || 100 }} XP</span>
+        <span>{{ userLevel?.xp_to_next || 100 }} XP</span>
       </div>
       <div class="w-full bg-gray-200 rounded-full h-2.5">
-        <div
-          class="bg-indigo-600 h-2.5 rounded-full transition-all duration-300"
-          :style="{ width: `${levelProgress}%` }"
-        ></div>
+        <div class="bg-indigo-600 h-2.5 rounded-full transition-all duration-300"
+          :style="{ width: `${levelProgress}%` }"></div>
       </div>
     </div>
   </div>
@@ -41,4 +39,4 @@ const levelProgress = computed(() => gamificationStore.levelProgress);
 defineOptions({
   name: 'UserProfile'
 });
-</script> 
+</script>

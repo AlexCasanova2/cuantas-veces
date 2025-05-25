@@ -22,6 +22,7 @@ create table achievements (
   achieved boolean default false,
   task_id bigint references tasks on delete cascade not null,
   date timestamp with time zone,
+  xp_reward integer default 50 not null,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );

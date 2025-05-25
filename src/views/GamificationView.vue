@@ -16,7 +16,7 @@
           <h3 class="font-medium mb-2">Estadísticas</h3>
           <p>Misiones Activas: {{ gamificationStore.activeMissions.length }}</p>
           <p>Logros Desbloqueados: {{ gamificationStore.achievements.length }}</p>
-          <p>Tareas Completadas: {{ taskStore.tasks.filter(t => t.progress === 100).length }}</p>
+          <p>Tareas Completadas: {{taskStore.tasks.filter(t => t.progress === 100).length}}</p>
         </div>
       </div>
     </div>
@@ -75,4 +75,4 @@ onMounted(async () => {
 defineOptions({
   name: 'GamificationView'
 });
-</script> 
+</script>

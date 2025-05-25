@@ -1,0 +1,886 @@
+[
+  {
+    "table_name": "tasks"
+  },
+  {
+    "table_name": "achievements"
+  },
+  {
+    "table_name": "xp_log"
+  },
+  {
+    "table_name": "profiles"
+  },
+  {
+    "table_name": "user_levels"
+  },
+  {
+    "table_name": "user_actions"
+  },
+  {
+    "table_name": "user_task_progress"
+  },
+  {
+    "table_name": "user_stats"
+  },
+  {
+    "table_name": "missions"
+  },
+  {
+    "table_name": "user_achievements"
+  },
+  {
+    "table_name": "user_missions"
+  },
+  {
+    "table_name": "categories"
+  },
+  {
+    "table_name": "task_stats_map"
+  }
+]
+
+[
+  {
+    "table_name": "achievements",
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('achievements_id_seq'::regclass)"
+  },
+  {
+    "table_name": "achievements",
+    "column_name": "task_id",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "achievements",
+    "column_name": "title",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "achievements",
+    "column_name": "description",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "achievements",
+    "column_name": "requirement",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "categories",
+    "column_name": "id",
+    "data_type": "bigint",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "categories",
+    "column_name": "name",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "categories",
+    "column_name": "color",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "categories",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "NO",
+    "column_default": "timezone('utc'::text, now())"
+  },
+  {
+    "table_name": "missions",
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('missions_id_seq'::regclass)"
+  },
+  {
+    "table_name": "missions",
+    "column_name": "title",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "missions",
+    "column_name": "description",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "missions",
+    "column_name": "xp_reward",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "10"
+  },
+  {
+    "table_name": "missions",
+    "column_name": "requirement",
+    "data_type": "jsonb",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "missions",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "name",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "role",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": "'user'::text"
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "NO",
+    "column_default": "timezone('utc'::text, now())"
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "NO",
+    "column_default": "timezone('utc'::text, now())"
+  },
+  {
+    "table_name": "task_stats_map",
+    "column_name": "task_id",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "task_stats_map",
+    "column_name": "sabiduria",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": "0"
+  },
+  {
+    "table_name": "task_stats_map",
+    "column_name": "carisma",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": "0"
+  },
+  {
+    "table_name": "task_stats_map",
+    "column_name": "resistencia",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": "0"
+  },
+  {
+    "table_name": "task_stats_map",
+    "column_name": "fuerza",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": "0"
+  },
+  {
+    "table_name": "task_stats_map",
+    "column_name": "creatividad",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": "0"
+  },
+  {
+    "table_name": "tasks",
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('tasks_id_seq'::regclass)"
+  },
+  {
+    "table_name": "tasks",
+    "column_name": "title",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "tasks",
+    "column_name": "description",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "tasks",
+    "column_name": "category",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "tasks",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "timezone('utc'::text, now())"
+  },
+  {
+    "table_name": "tasks",
+    "column_name": "date",
+    "data_type": "date",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "tasks",
+    "column_name": "time",
+    "data_type": "time without time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "tasks",
+    "column_name": "category_id",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "tasks",
+    "column_name": "xp_reward",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": "1"
+  },
+  {
+    "table_name": "tasks",
+    "column_name": "requirements",
+    "data_type": "jsonb",
+    "is_nullable": "YES",
+    "column_default": "'{\"type\": \"count\", \"count\": 1}'::jsonb"
+  },
+  {
+    "table_name": "user_achievements",
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('user_achievements_id_seq'::regclass)"
+  },
+  {
+    "table_name": "user_achievements",
+    "column_name": "user_id",
+    "data_type": "uuid",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "user_achievements",
+    "column_name": "achievement_id",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "user_achievements",
+    "column_name": "achieved_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "user_achievements",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "user_achievements",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "user_actions",
+    "column_name": "id",
+    "data_type": "bigint",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "user_actions",
+    "column_name": "user_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "user_actions",
+    "column_name": "task_id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "user_actions",
+    "column_name": "action_type",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "user_actions",
+    "column_name": "increment_value",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "1"
+  },
+  {
+    "table_name": "user_actions",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "NO",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "user_levels",
+    "column_name": "user_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "user_levels",
+    "column_name": "level",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "1"
+  },
+  {
+    "table_name": "user_levels",
+    "column_name": "current_xp",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "user_levels",
+    "column_name": "xp_to_next",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "100"
+  },
+  {
+    "table_name": "user_levels",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "user_missions",
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('user_missions_id_seq'::regclass)"
+  },
+  {
+    "table_name": "user_missions",
+    "column_name": "user_id",
+    "data_type": "uuid",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "user_missions",
+    "column_name": "mission_id",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "user_missions",
+    "column_name": "completed",
+    "data_type": "boolean",
+    "is_nullable": "YES",
+    "column_default": "false"
+  },
+  {
+    "table_name": "user_missions",
+    "column_name": "progress",
+    "data_type": "jsonb",
+    "is_nullable": "YES",
+    "column_default": "'{}'::jsonb"
+  },
+  {
+    "table_name": "user_missions",
+    "column_name": "completed_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "user_missions",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "user_missions",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "user_missions",
+    "column_name": "state",
+    "data_type": "USER-DEFINED",
+    "is_nullable": "NO",
+    "column_default": "'available'::mission_state"
+  },
+  {
+    "table_name": "user_missions",
+    "column_name": "accepted_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "user_stats",
+    "column_name": "user_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "user_stats",
+    "column_name": "sabiduria",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "user_stats",
+    "column_name": "carisma",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "user_stats",
+    "column_name": "resistencia",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "user_stats",
+    "column_name": "fuerza",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "user_stats",
+    "column_name": "creatividad",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "user_stats",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "user_task_progress",
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "user_task_progress",
+    "column_name": "user_id",
+    "data_type": "uuid",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "user_task_progress",
+    "column_name": "task_id",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "user_task_progress",
+    "column_name": "count",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": "0"
+  },
+  {
+    "table_name": "user_task_progress",
+    "column_name": "progress",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": "0"
+  },
+  {
+    "table_name": "user_task_progress",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "user_task_progress",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "user_task_progress",
+    "column_name": "requirement",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "user_task_progress",
+    "column_name": "is_completed",
+    "data_type": "boolean",
+    "is_nullable": "YES",
+    "column_default": "false"
+  },
+  {
+    "table_name": "xp_log",
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('xp_log_id_seq'::regclass)"
+  },
+  {
+    "table_name": "xp_log",
+    "column_name": "user_id",
+    "data_type": "uuid",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "xp_log",
+    "column_name": "task_id",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "xp_log",
+    "column_name": "xp_earned",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "xp_log",
+    "column_name": "source",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": "'task'::text"
+  },
+  {
+    "table_name": "xp_log",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  }
+]
+
+
+[
+  {
+    "from_table": "achievements",
+    "from_column": "task_id",
+    "to_table": "tasks",
+    "to_column": "id"
+  },
+  {
+    "from_table": "user_task_progress",
+    "from_column": "task_id",
+    "to_table": "tasks",
+    "to_column": "id"
+  },
+  {
+    "from_table": "user_achievements",
+    "from_column": "achievement_id",
+    "to_table": "achievements",
+    "to_column": "id"
+  },
+  {
+    "from_table": "tasks",
+    "from_column": "category_id",
+    "to_table": "categories",
+    "to_column": "id"
+  },
+  {
+    "from_table": "xp_log",
+    "from_column": "task_id",
+    "to_table": "tasks",
+    "to_column": "id"
+  },
+  {
+    "from_table": "user_missions",
+    "from_column": "mission_id",
+    "to_table": "missions",
+    "to_column": "id"
+  },
+  {
+    "from_table": "task_stats_map",
+    "from_column": "task_id",
+    "to_table": "tasks",
+    "to_column": "id"
+  },
+  {
+    "from_table": "user_actions",
+    "from_column": "task_id",
+    "to_table": "tasks",
+    "to_column": "id"
+  }
+]
+
+[
+  {
+    "constraint_name": "tasks_pkey",
+    "constraint_type": "PRIMARY KEY",
+    "table_name": "tasks",
+    "column_name": "id"
+  },
+  {
+    "constraint_name": "achievements_pkey",
+    "constraint_type": "PRIMARY KEY",
+    "table_name": "achievements",
+    "column_name": "id"
+  },
+  {
+    "constraint_name": "achievements_task_id_fkey",
+    "constraint_type": "FOREIGN KEY",
+    "table_name": "achievements",
+    "column_name": "task_id"
+  },
+  {
+    "constraint_name": "profiles_pkey",
+    "constraint_type": "PRIMARY KEY",
+    "table_name": "profiles",
+    "column_name": "id"
+  },
+  {
+    "constraint_name": "profiles_id_fkey",
+    "constraint_type": "FOREIGN KEY",
+    "table_name": "profiles",
+    "column_name": "id"
+  },
+  {
+    "constraint_name": "user_task_progress_pkey",
+    "constraint_type": "PRIMARY KEY",
+    "table_name": "user_task_progress",
+    "column_name": "id"
+  },
+  {
+    "constraint_name": "user_task_progress_user_id_task_id_key",
+    "constraint_type": "UNIQUE",
+    "table_name": "user_task_progress",
+    "column_name": "user_id"
+  },
+  {
+    "constraint_name": "user_task_progress_user_id_task_id_key",
+    "constraint_type": "UNIQUE",
+    "table_name": "user_task_progress",
+    "column_name": "task_id"
+  },
+  {
+    "constraint_name": "user_task_progress_user_id_fkey",
+    "constraint_type": "FOREIGN KEY",
+    "table_name": "user_task_progress",
+    "column_name": "user_id"
+  },
+  {
+    "constraint_name": "user_task_progress_task_id_fkey",
+    "constraint_type": "FOREIGN KEY",
+    "table_name": "user_task_progress",
+    "column_name": "task_id"
+  },
+  {
+    "constraint_name": "user_achievements_pkey",
+    "constraint_type": "PRIMARY KEY",
+    "table_name": "user_achievements",
+    "column_name": "id"
+  },
+  {
+    "constraint_name": "user_achievements_user_id_achievement_id_key",
+    "constraint_type": "UNIQUE",
+    "table_name": "user_achievements",
+    "column_name": "user_id"
+  },
+  {
+    "constraint_name": "user_achievements_user_id_achievement_id_key",
+    "constraint_type": "UNIQUE",
+    "table_name": "user_achievements",
+    "column_name": "achievement_id"
+  },
+  {
+    "constraint_name": "user_achievements_user_id_fkey",
+    "constraint_type": "FOREIGN KEY",
+    "table_name": "user_achievements",
+    "column_name": "user_id"
+  },
+  {
+    "constraint_name": "user_achievements_achievement_id_fkey",
+    "constraint_type": "FOREIGN KEY",
+    "table_name": "user_achievements",
+    "column_name": "achievement_id"
+  },
+  {
+    "constraint_name": "categories_pkey",
+    "constraint_type": "PRIMARY KEY",
+    "table_name": "categories",
+    "column_name": "id"
+  },
+  {
+    "constraint_name": "fk_category",
+    "constraint_type": "FOREIGN KEY",
+    "table_name": "tasks",
+    "column_name": "category_id"
+  },
+  {
+    "constraint_name": "xp_log_pkey",
+    "constraint_type": "PRIMARY KEY",
+    "table_name": "xp_log",
+    "column_name": "id"
+  },
+  {
+    "constraint_name": "xp_log_user_id_fkey",
+    "constraint_type": "FOREIGN KEY",
+    "table_name": "xp_log",
+    "column_name": "user_id"
+  },
+  {
+    "constraint_name": "xp_log_task_id_fkey",
+    "constraint_type": "FOREIGN KEY",
+    "table_name": "xp_log",
+    "column_name": "task_id"
+  },
+  {
+    "constraint_name": "user_levels_pkey",
+    "constraint_type": "PRIMARY KEY",
+    "table_name": "user_levels",
+    "column_name": "user_id"
+  },
+  {
+    "constraint_name": "user_levels_user_id_fkey",
+    "constraint_type": "FOREIGN KEY",
+    "table_name": "user_levels",
+    "column_name": "user_id"
+  },
+  {
+    "constraint_name": "user_stats_pkey",
+    "constraint_type": "PRIMARY KEY",
+    "table_name": "user_stats",
+    "column_name": "user_id"
+  },
+  {
+    "constraint_name": "user_stats_user_id_fkey",
+    "constraint_type": "FOREIGN KEY",
+    "table_name": "user_stats",
+    "column_name": "user_id"
+  },
+  {
+    "constraint_name": "missions_pkey",
+    "constraint_type": "PRIMARY KEY",
+    "table_name": "missions",
+    "column_name": "id"
+  },
+  {
+    "constraint_name": "user_missions_pkey",
+    "constraint_type": "PRIMARY KEY",
+    "table_name": "user_missions",
+    "column_name": "id"
+  },
+  {
+    "constraint_name": "user_missions_user_id_fkey",
+    "constraint_type": "FOREIGN KEY",
+    "table_name": "user_missions",
+    "column_name": "user_id"
+  },
+  {
+    "constraint_name": "user_missions_mission_id_fkey",
+    "constraint_type": "FOREIGN KEY",
+    "table_name": "user_missions",
+    "column_name": "mission_id"
+  },
+  {
+    "constraint_name": "task_stats_map_task_id_fkey",
+    "constraint_type": "FOREIGN KEY",
+    "table_name": "task_stats_map",
+    "column_name": "task_id"
+  },
+  {
+    "constraint_name": "user_actions_pkey",
+    "constraint_type": "PRIMARY KEY",
+    "table_name": "user_actions",
+    "column_name": "id"
+  },
+  {
+    "constraint_name": "user_actions_user_id_fkey",
+    "constraint_type": "FOREIGN KEY",
+    "table_name": "user_actions",
+    "column_name": "user_id"
+  },
+  {
+    "constraint_name": "user_actions_task_id_fkey",
+    "constraint_type": "FOREIGN KEY",
+    "table_name": "user_actions",
+    "column_name": "task_id"
+  }
+]

@@ -1,4 +1,4 @@
-import type { Category } from '../stores/category.store';
+import type { Category } from '../types/task';
 import { supabase } from './supabase';
 
 export async function fetchCategories(): Promise<Category[]> {

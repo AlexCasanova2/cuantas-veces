@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { supabase } from '../services/supabase';
+import * as authService from '../services/auth.service';
 import type { User } from '@supabase/supabase-js';
 
 interface Profile {
@@ -122,6 +123,48 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
+    async function signInWithGoogle() {
+        isLoading.value = true;
+        error.value = null;
+        try {
+            const { data } = await authService.signInWithGoogle();
+            // La redirección la maneja Supabase
+        } catch (e) {
+            error.value = e instanceof Error ? e.message : 'Error al iniciar sesión con Google';
+            throw e;
+        } finally {
+            isLoading.value = false;
+        }
+    }
+
+    async function signOut() {
+        isLoading.value = true;
+        error.value = null;
+        try {
+            await authService.signOut();
+            user.value = null;
+        } catch (e) {
+            error.value = e instanceof Error ? e.message : 'Error al cerrar sesión';
+            throw e;
+        } finally {
+            isLoading.value = false;
+        }
+    }
+
+    async function checkSession() {
+        isLoading.value = true;
+        error.value = null;
+        try {
+            const session = await authService.getSession();
+            user.value = session?.user ?? null;
+        } catch (e) {
+            error.value = e instanceof Error ? e.message : 'Error al verificar la sesión';
+            throw e;
+        } finally {
+            isLoading.value = false;
+        }
+    }
+
     return {
         user,
         profile,
@@ -134,6 +177,9 @@ export const useAuthStore = defineStore('auth', () => {
         register,
         login,
         setUserRole,
-        logout
+        logout,
+        signInWithGoogle,
+        signOut,
+        checkSession
     };
 }); 

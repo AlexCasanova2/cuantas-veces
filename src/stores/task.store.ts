@@ -3,6 +3,8 @@ import { ref, computed } from 'vue';
 import type { Task, CreateTaskDTO, UpdateUserTaskProgressDTO, TaskWithProgress, UserTaskProgress, UserAchievement } from '../types/task';
 import * as taskService from '../services/task.service';
 import { useAuthStore } from './auth.store';
+import { useUserStore } from './user.store';
+import { supabase } from '../services/supabase';
 
 export const useTaskStore = defineStore('task', () => {
     const tasks = ref<TaskWithProgress[]>([]);
@@ -22,6 +24,30 @@ export const useTaskStore = defineStore('task', () => {
     const tasksList = computed<TaskWithProgress[]>(() => tasks.value);
 
     // Actions
+    async function getTask(id: number): Promise<Task | null> {
+        try {
+            const { data, error: fetchError } = await supabase
+                .from('tasks')
+                .select(`
+                    *,
+                    achievements (*),
+                    categories (
+                        id,
+                        name,
+                        color
+                    )
+                `)
+                .eq('id', id)
+                .single();
+
+            if (fetchError) throw fetchError;
+            return data as Task;
+        } catch (error) {
+            console.error('Error al obtener la tarea:', error);
+            return null;
+        }
+    }
+
     async function fetchTasks() {
         isLoading.value = true;
         error.value = null;
@@ -76,7 +102,12 @@ export const useTaskStore = defineStore('task', () => {
         isLoading.value = true;
         error.value = null;
         try {
-            categories.value = await taskService.getAllCategories();
+            const { data, error: fetchError } = await supabase
+                .from('categories')
+                .select('name');
+            
+            if (fetchError) throw fetchError;
+            categories.value = data.map((c: { name: string }) => c.name);
         } catch (e) {
             error.value = e instanceof Error ? e.message : 'Error desconocido';
             console.error('Error al cargar las categorías:', e);
@@ -88,8 +119,15 @@ export const useTaskStore = defineStore('task', () => {
     async function createTask(task: CreateTaskDTO) {
         try {
             const newTask = await taskService.createTask(task);
-            tasks.value.unshift(newTask);
-            return newTask;
+            // Añadimos las propiedades necesarias para TaskWithProgress
+            const taskWithProgress: TaskWithProgress = {
+                ...newTask,
+                count: 0,
+                progress: 0,
+                completedAchievementIds: []
+            };
+            tasks.value.unshift(taskWithProgress);
+            return taskWithProgress;
         } catch (error) {
             console.error('Error al crear la tarea:', error);
             throw error;
@@ -98,20 +136,47 @@ export const useTaskStore = defineStore('task', () => {
 
     async function updateTask(id: number, taskData: Partial<Task>) {
         try {
+            console.log('>>> [taskStore.updateTask] Iniciando actualización de tarea:', { id, taskData });
             const updatedTask = await taskService.updateTask(id, taskData);
+            console.log('>>> [taskStore.updateTask] Tarea actualizada en el servicio:', updatedTask);
             
             // Actualizamos la tarea en el store
             const index = tasks.value.findIndex(t => t.id === id);
+            console.log('>>> [taskStore.updateTask] Índice de la tarea en el store:', index);
+            
             if (index !== -1) {
-                tasks.value[index] = {
-                    ...tasks.value[index],
-                    ...updatedTask
+                // Mantenemos los datos de progreso del usuario
+                const currentTask = tasks.value[index];
+                console.log('>>> [taskStore.updateTask] Tarea actual en el store:', currentTask);
+                
+                const taskWithProgress: TaskWithProgress = {
+                    ...updatedTask,
+                    count: currentTask.count,
+                    progress: currentTask.progress,
+                    completedAchievementIds: currentTask.completedAchievementIds
                 };
+                
+                console.log('>>> [taskStore.updateTask] Nueva tarea con progreso:', taskWithProgress);
+                
+                // Actualizamos el array de tareas de manera reactiva
+                tasks.value = tasks.value.map(task => {
+                    if (task.id === id) {
+                        console.log('>>> [taskStore.updateTask] Actualizando tarea en el array');
+                        return taskWithProgress;
+                    }
+                    return task;
+                });
+                
+                console.log('>>> [taskStore.updateTask] Array de tareas actualizado:', tasks.value);
+            } else {
+                // Si no encontramos la tarea, recargamos todas las tareas
+                console.log('>>> [taskStore.updateTask] Tarea no encontrada en el store, recargando...');
+                await fetchTasks();
             }
             
             return updatedTask;
         } catch (error) {
-            console.error('Error al actualizar la tarea:', error);
+            console.error('>>> [taskStore.updateTask] Error al actualizar la tarea:', error);
             throw error;
         }
     }
@@ -120,6 +185,7 @@ export const useTaskStore = defineStore('task', () => {
         isLoading.value = true;
         error.value = null;
         const authStore = useAuthStore();
+        const userStore = useUserStore();
         const userId = authStore.user?.id;
 
         if (!userId) {
@@ -149,8 +215,14 @@ export const useTaskStore = defineStore('task', () => {
             if (newlyAchievedIds.length > 0) {
                 for (const achievementId of newlyAchievedIds) {
                     try {
-                         await taskService.addUserAchievement(userId, achievementId);
-                         userAchievements.value.push({ achievement_id: achievementId, user_id: userId, id: -1, achieved_at: new Date().toISOString(), created_at: new Date().toISOString(), updated_at: new Date().toISOString() });
+                        await taskService.addUserAchievement(userId, achievementId);
+                        userAchievements.value.push({ achievement_id: achievementId, user_id: userId, id: -1, achieved_at: new Date().toISOString(), created_at: new Date().toISOString(), updated_at: new Date().toISOString() });
+                        
+                        // Actualizar XP del usuario
+                        const achievement = task?.achievements?.find(a => a.id === achievementId);
+                        if (achievement?.xp_reward) {
+                            await userStore.addXP(achievement.xp_reward);
+                        }
                     } catch (e) {
                         console.error(`Error al añadir logro ${achievementId} para usuario ${userId}:`, e);
                     }
@@ -186,7 +258,8 @@ export const useTaskStore = defineStore('task', () => {
             userAchievements.value = userAchievements.value.filter(ua => ua.achievement_id !== id);
             const authStore = useAuthStore();
             if (authStore.user?.id) {
-               await fetchUserAchievements(authStore.user.id);
+               const achievedAchievements = await taskService.fetchUserAchievements(authStore.user.id);
+               userAchievements.value = achievedAchievements;
             }
         } catch (e) {
             error.value = e instanceof Error ? e.message : 'Error desconocido';
@@ -197,7 +270,7 @@ export const useTaskStore = defineStore('task', () => {
         }
     }
 
-    async function addAchievementsToTask(taskId: number, achievements: { title: string; requirement: number }[]) {
+    async function addAchievementsToTask(taskId: number, achievements: { title: string; description: string; requirement: number }[]) {
         try {
             const newAchievements = await taskService.addAchievementsToTask(taskId, achievements);
             
@@ -217,6 +290,21 @@ export const useTaskStore = defineStore('task', () => {
         }
     }
 
+    // Métodos para actualizaciones en tiempo real
+    function addTask(task: Task) {
+        const taskWithProgress: TaskWithProgress = {
+            ...task,
+            progress: 0,
+            count: 0,
+            completedAchievementIds: []
+        };
+        tasks.value.push(taskWithProgress);
+    }
+
+    function removeTask(taskId: number) {
+        tasks.value = tasks.value.filter(t => t.id !== taskId);
+    }
+
     return {
         tasks,
         userAchievements,
@@ -225,6 +313,7 @@ export const useTaskStore = defineStore('task', () => {
         error,
         recentTasks,
         tasksList,
+        getTask,
         fetchTasks,
         fetchCategories,
         createTask,
@@ -232,5 +321,7 @@ export const useTaskStore = defineStore('task', () => {
         updateTaskCount,
         deleteTask,
         addAchievementsToTask,
+        addTask,
+        removeTask
     };
 }); 

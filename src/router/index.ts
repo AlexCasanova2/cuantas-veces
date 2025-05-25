@@ -7,8 +7,13 @@ import TaskDetailView from '../views/TaskDetailView.vue'
 import ProfileView from '../views/ProfileView.vue'
 import AchievementsView from '../views/AchievementsView.vue'
 import GamificationView from '../views/GamificationView.vue'
+import TasksView from '../views/TasksView.vue'
 import { useUserStore } from '../stores/user.store'
 import { useAuthStore } from '../stores/auth.store'
+import CreateTaskView from '../views/admin/CreateTaskView.vue'
+import EditTaskView from '../views/admin/EditTaskView.vue'
+import CreateMissionView from '../views/admin/CreateMissionView.vue'
+import EditMissionView from '../views/admin/EditMissionView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -29,7 +34,12 @@ const router = createRouter({
       component: HomeView,
       meta: { requiresAuth: true },
     },
-   
+    {
+      path: '/tasks',
+      name: 'tasks',
+      component: TasksView,
+      meta: { requiresAuth: true },
+    },
     {
       path: '/task/:id',
       name: 'task-detail',
@@ -70,6 +80,28 @@ const router = createRouter({
       name: 'gamification',
       component: GamificationView,
       meta: { requiresAuth: true }
+    },
+    {
+      path: '/admin/tasks/create',
+      name: 'create-task',
+      component: CreateTaskView
+    },
+    {
+      path: '/admin/tasks/:id/edit',
+      name: 'edit-task',
+      component: EditTaskView,
+      meta: { requiresAuth: true, requiresAdmin: true }
+    },
+    {
+      path: '/admin/missions/create',
+      name: 'create-mission',
+      component: CreateMissionView
+    },
+    {
+      path: '/admin/missions/:id/edit',
+      name: 'edit-mission',
+      component: EditMissionView,
+      meta: { requiresAuth: true, requiresAdmin: true }
     }
   ],
   scrollBehavior(to, from, savedPosition) {

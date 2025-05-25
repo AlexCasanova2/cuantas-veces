@@ -1,15 +1,27 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
-import { ref, onMounted, computed } from '@vue/runtime-core'
+import { ref, onMounted, computed, onUnmounted } from 'vue'
 import { useUserStore } from './stores/user.store'
+import { RealtimeService } from './services/realtime.service'
 
 const userStore = useUserStore()
 const isAuthenticated = computed(() => {
   return !!userStore.user && !!userStore.profile
 })
 
+let realtimeService: RealtimeService | null = null
+
 onMounted(async () => {
   await userStore.checkSession()
+  if (userStore.user) {
+    realtimeService = new RealtimeService()
+  }
+})
+
+onUnmounted(() => {
+  if (realtimeService) {
+    realtimeService.cleanup()
+  }
 })
 </script>
 
@@ -105,5 +117,22 @@ nav a:first-of-type {
   left: 0;
   width: 100%;
   height: 100%;
+}
+</style>
+
+<style>
+body,
+#app {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+/* Estilos específicos para la vista de administración */
+.admin-view {
+  width: 100%;
+  min-height: 100vh;
+  padding: 1.5rem;
 }
 </style>

@@ -1,14 +1,8 @@
 <template>
     <div>
         <label v-if="label" :for="id" class="block mb-1 text-sm font-medium text-gray-700">{{ label }}</label>
-        <input
-            :id="id"
-            :type="type"
-            v-model="inputValue"
-            :placeholder="placeholder"
-            :disabled="disabled"
-            class="w-full px-4 py-2 rounded-xl bg-grayLight border-none focus:ring-2 focus:ring-primary text-dark placeholder-grayText"
-        />
+        <input :id="id" :type="type" v-model="inputValue" :placeholder="placeholder" :disabled="disabled"
+            class="w-full px-4 py-2 rounded-xl bg-white border-none focus:ring-2 focus:ring-primary text-dark placeholder-grayText" />
     </div>
 </template>
 

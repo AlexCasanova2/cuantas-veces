@@ -89,7 +89,7 @@
               <div class="flex items-center justify-between mb-2">
                 <h4 class="font-medium text-purple-800">Próximo logro</h4>
                 <span class="text-sm font-medium text-purple-600">{{ task.count }}/{{ nextAchievement.requirement
-                  }}</span>
+                }}</span>
               </div>
               <p class="text-purple-700 mb-3">{{ nextAchievement.title }}</p>
               <div class="relative w-full bg-white rounded-full h-2.5">
@@ -211,15 +211,20 @@ import { ref, onMounted, watch, computed } from '@vue/runtime-core';
 import { useRoute, useRouter } from 'vue-router';
 import { useTaskStore } from '../stores/task.store';
 import { useUserStore } from '../stores/user.store';
+import { useGamificationStore } from '../stores/gamification.store';
 import type { TaskWithProgress, Category } from '../types/task';
 import * as taskService from '../services/task.service';
 import { useCategoryStore } from '../stores/category.store';
 import confetti from 'canvas-confetti';
 
+// Declaración del módulo canvas-confetti
+declare module 'canvas-confetti';
+
 const route = useRoute();
 const router = useRouter();
 const taskStore = useTaskStore();
 const userStore = useUserStore();
+const gamificationStore = useGamificationStore();
 const categoryStore = useCategoryStore();
 
 const taskId = computed(() => Number(route.params.id));
@@ -229,6 +234,7 @@ const activeTab = ref<'progress' | 'info' | 'trophies'>('progress');
 const progressBarRef = ref<HTMLElement | null>(null);
 const showFloatingText = ref(false);
 const animatedBorder = ref<HTMLElement | null>(null);
+const previousCompletedAchievementIds = ref<number[]>([]);
 
 // Computed para obtener el próximo logro disponible
 const nextAchievement = computed(() => {
@@ -251,6 +257,18 @@ const isNearAchievement = computed(() => {
   const progress = (task.value.count / nextAchievement.value.requirement) * 100;
   return progress >= 80 && progress < 100;
 });
+
+// Watcher para detectar cuando se completa un logro
+watch(() => task.value?.completedAchievementIds, (newIds, oldIds) => {
+  if (!newIds || !oldIds) return;
+
+  // Si hay nuevos logros completados, lanzar confeti
+  const newlyCompleted = newIds.filter(id => !oldIds.includes(id));
+  if (newlyCompleted.length > 0) {
+    console.log('>>> [TaskDetailView] ¡Nuevo logro completado! Lanzando confeti...');
+    launchConfetti();
+  }
+}, { deep: true });
 
 async function fetchTaskDetail(id: number) {
   if (!userStore.user) {
@@ -279,7 +297,7 @@ async function fetchTaskDetail(id: number) {
         count: progress.count,
         progress: progress.progress,
         completedAchievementIds,
-        category: category || { id: 0, name: 'Sin categoría', color: '#000000' }
+        category: category || { id: 0, name: 'Sin categoría', created_at: '', updated_at: '' }
       };
 
       // Reiniciar la animación de la barra de progreso
@@ -340,36 +358,55 @@ function startBorderAnimation() {
 
 // Modificar la función handleIncrement
 async function handleIncrement() {
+  console.log('>>> [TaskDetailView] handleIncrement ejecutado para task:', task.value?.id);
   if (!task.value || !userStore.user) return;
 
+  const userId = userStore.user.id;
+  const currentTask = task.value;
+
+  // Mostrar texto flotante
+  showFloatingText.value = true;
+  setTimeout(() => {
+    showFloatingText.value = false;
+  }, 1000);
+
+  // Iniciar animación del borde
+  startBorderAnimation();
+
   try {
-    // Mostrar texto flotante
-    showFloatingText.value = true;
-    setTimeout(() => {
-      showFloatingText.value = false;
-    }, 1000);
+    console.log('>>> [TaskDetailView] Llamando a gamificationStore.registerAction con userId: %s, taskId: %d', userId, currentTask.id);
+    // Llamar a registerAction que maneja la actualización en backend y recarga datos de gamificación
+    await gamificationStore.registerAction(userId, currentTask.id);
+    console.log('>>> [TaskDetailView] gamificationStore.registerAction finalizado.');
 
-    // Iniciar animación del borde
-    startBorderAnimation();
-
-    await taskStore.updateTaskCount({ task_id: task.value.id, count: task.value.count + 1 });
-    await fetchTaskDetail(task.value.id);
-
-    // Verificar si se alcanzó un logro
-    const previousCount = task.value.count - 1;
-    const currentCount = task.value.count;
-    const achievements = task.value.achievements || [];
-
-    const newAchievement = achievements.find(achievement =>
-      previousCount < achievement.requirement && currentCount >= achievement.requirement
-    );
-
-    if (newAchievement) {
-      launchConfetti();
+    // Actualizar el estado local (esto es reactivo por Pinia)
+    if (task.value) {
+      // No necesitamos incrementar localmente, el fetchTaskDetail lo hará
+      // task.value.count = task.value.count + 1;
+      console.log('>>> [TaskDetailView] Contador local (antes de refetch): ', task.value.count);
     }
+
+    // Recargar los detalles de la tarea para asegurar sincronización con la BD
+    // Esto actualizará el task.value reactivo con el nuevo count y completedAchievementIds
+    console.log('>>> [TaskDetailView] Refetching task detail...');
+    await fetchTaskDetail(currentTask.id);
+    console.log('>>> [TaskDetailView] Task detail refetched.');
+
+    // Verificar si se completó un logro (basado en los datos refetched)
+    // La lógica de confeti se basa en si completedAchievementIds incluye el nextAchievement.id
+    // Esto ya está manejado reactivamente por el computed nextAchievement y la condición en el template.
+    // Sin embargo, si necesitas disparar efectos *inmediatamente* al conseguir un logro, podrías necesitar
+    // comparar completedAchievementIds antes y después del fetch, o basarte en el resultado de registerAction
+    // si este retorna información sobre logros desbloqueados.
+    // Por ahora, confiamos en que el template reaccionará a los completedAchievementIds actualizados por fetchTaskDetail.
+
+    console.log('>>> [TaskDetailView] Verificando confeti (basado en estado reactivo)...');
+    // El confeti se dispara si nextAchievement cambia de un estado no cumplido a cumplido después del fetch
+    // Esto es manejado por la lógica actual que verifica completedAchievementIds en el computed properties y template.
+
   } catch (e) {
-    error.value = e instanceof Error ? e.message : 'Error al actualizar el contador';
-    console.error('Error al incrementar:', e);
+    error.value = e instanceof Error ? e.message : 'Error al registrar la acción o actualizar la tarea.';
+    console.error('>>> [TaskDetailView] Error en handleIncrement:', e);
   }
 }
 
