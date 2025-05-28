@@ -3,7 +3,7 @@ import { ref, computed } from '@vue/runtime-core';
 import type { UserMission } from '../services/userMission.service';
 import * as userMissionService from '../services/userMission.service';
 import { useUserStore } from './user.store'; // Necesitamos el userStore para obtener el userId
-import type { Mission } from '../services/mission.service'; // Importar tipo Mission
+import type { Mission } from '../types/mission';
 
 export interface UserMissionState {
   state: 'available' | 'accepted' | 'completed';

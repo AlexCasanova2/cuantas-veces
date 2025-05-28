@@ -1,11 +1,13 @@
+import type { Category } from './category';
+
 export interface Task {
     id: number;
     title: string;
-    description: string;
+    description: string | null;
     category_id: number;
+    state: 'draft' | 'published' | 'deleted';
     created_at: string;
     updated_at: string;
-    state: 'draft' | 'published' | 'deleted';
     achievements?: Achievement[];
 }
 
@@ -13,7 +15,7 @@ export interface Achievement {
     id: number;
     task_id: number;
     title: string;
-    description: string;
+    description: string | null;
     requirement: number;
     xp_reward: number;
     created_at: string;
@@ -43,10 +45,23 @@ export interface UserTaskProgress {
 
 export interface CreateTaskDTO {
     title: string;
-    description: string;
+    description: string | null;
     category_id: number;
     state: 'draft' | 'published' | 'deleted';
     achievements: {
+        title: string;
+        description: string | null;
+        requirement: number;
+        xp_reward: number;
+    }[];
+}
+
+export interface UpdateTaskDTO {
+    title?: string;
+    description?: string | null;
+    category_id?: number;
+    state?: 'draft' | 'published' | 'deleted';
+    achievements?: {
         id?: number;
         title: string;
         description: string | null;
@@ -58,14 +73,6 @@ export interface CreateTaskDTO {
 export interface UpdateUserTaskProgressDTO {
     task_id: number;
     count: number;
-}
-
-export interface Category {
-    id: number;
-    name: string;
-    description?: string;
-    created_at: string;
-    updated_at: string;
 }
 
 // Tipo combinado para mostrar en la UI (tarea global + progreso del usuario + logros conseguidos)

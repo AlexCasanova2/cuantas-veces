@@ -36,7 +36,7 @@
                 {{ isAchievementUnlocked(achievement.id) ? 'Completado' : 'Pendiente' }}
               </p>
               <p v-if="isAchievementUnlocked(achievement.id)" class="text-xs text-gray-500">
-                {{ getUnlockDate(achievement.id) }}
+                {{ getUnlockedDate(achievement.id) }}
               </p>
             </div>
           </div>
@@ -55,15 +55,14 @@ import type { Achievement } from '@/services/gamification.service';
 const taskStore = useTaskStore();
 const gamificationStore = useGamificationStore();
 
-function isAchievementUnlocked(achievementId: number): boolean {
-  return gamificationStore.achievements.some((a: Achievement & { unlocked_at: string }) => a.id === achievementId);
-}
+const isAchievementUnlocked = (achievementId: number) => {
+    return gamificationStore.userAchievements.some((a: Achievement & { unlocked_at: string }) => a.id === achievementId);
+};
 
-function getUnlockDate(achievementId: number): string {
-  const achievement = gamificationStore.achievements.find((a: Achievement & { unlocked_at: string }) => a.id === achievementId);
-  if (!achievement?.unlocked_at) return '';
-  return new Date(achievement.unlocked_at).toLocaleDateString();
-}
+const getUnlockedDate = (achievementId: number) => {
+    const achievement = gamificationStore.userAchievements.find((a: Achievement & { unlocked_at: string }) => a.id === achievementId);
+    return achievement?.unlocked_at;
+};
 
 defineOptions({
   name: 'Achievements'

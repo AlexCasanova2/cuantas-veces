@@ -143,8 +143,9 @@ import BaseButton from '../components/ui/BaseButton.vue';
 import BaseSearchBar from '../components/ui/BaseSearchBar.vue';
 import BaseNavBar from '../components/ui/BaseNavBar.vue';
 import MissionCard from '../components/MissionCard.vue';
-import type { Task, TaskWithProgress, Category } from '../types/task';
+import type { Task, TaskWithProgress } from '../types/task';
 import type { Mission } from '../types/mission';
+import type { Category } from '../types/category';
 
 const userStore = useUserStore();
 const taskStore = useTaskStore();
@@ -155,7 +156,10 @@ const userMissionStore = useUserMissionStore();
 const router = useRouter();
 const route = useRoute();
 
-const userName = computed<string>(() => userStore.profile?.name || 'Usuario');
+const userName = computed<string>(() => {
+  console.log('>>> [HomeView] Calculando userName. userStore.profile:', JSON.parse(JSON.stringify(userStore.profile)));
+  return userStore.profile?.name || 'Usuario';
+});
 const tasksList = computed(() => taskStore.tasks);
 const search = ref('');
 
@@ -198,7 +202,10 @@ async function navigateToTaskDetail(taskId: number) {
 }
 
 onMounted(async () => {
+  console.log('>>> [HomeView] onMounted iniciado');
   await authStore.checkUser();
+  console.log('>>> [HomeView] authStore.checkUser() finalizado');
+  console.log('>>> [HomeView] userStore.profile después de checkUser:', JSON.parse(JSON.stringify(userStore.profile)));
   await taskStore.fetchTasks();
   await categoryStore.fetchCategories();
   await missionStore.fetchMissions();

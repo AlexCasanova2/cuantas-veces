@@ -3,8 +3,9 @@ import { useTaskStore } from '../stores/task.store';
 import { useMissionStore } from '../stores/mission.store';
 import { useUserMissionStore } from '../stores/userMission.store';
 import { useGamificationStore } from '../stores/gamification.store';
-import type { Task } from '../types/task';
+import type { Task, TaskWithProgress } from '../types/task';
 import type { Mission } from '../types/mission';
+import type { Achievement } from '../types/achievement';
 
 export class RealtimeService {
     private taskStore = useTaskStore();
@@ -69,32 +70,48 @@ export class RealtimeService {
     private handleTaskChange(payload: any) {
         const { eventType, new: newRecord, old: oldRecord } = payload;
 
-        switch (eventType) {
-            case 'INSERT':
-                this.taskStore.addTask(newRecord as Task);
-                break;
-            case 'UPDATE':
-                this.taskStore.updateTask(newRecord as Task);
-                break;
-            case 'DELETE':
-                this.taskStore.removeTask(oldRecord.id);
-                break;
+        if (eventType === 'INSERT') {
+            const taskWithProgress: TaskWithProgress = {
+                ...newRecord as Task,
+                progress: 0,
+                count: 0,
+                completedAchievementIds: []
+            };
+            this.taskStore.tasks.push(taskWithProgress);
+        } else if (eventType === 'UPDATE') {
+            const index = this.taskStore.tasks.findIndex(t => t.id === newRecord.id);
+            if (index !== -1) {
+                const taskWithProgress: TaskWithProgress = {
+                    ...newRecord as Task,
+                    progress: this.taskStore.tasks[index].progress,
+                    count: this.taskStore.tasks[index].count,
+                    completedAchievementIds: this.taskStore.tasks[index].completedAchievementIds
+                };
+                this.taskStore.tasks[index] = taskWithProgress;
+            }
+        } else if (eventType === 'DELETE') {
+            const index = this.taskStore.tasks.findIndex(t => t.id === oldRecord.id);
+            if (index !== -1) {
+                this.taskStore.tasks.splice(index, 1);
+            }
         }
     }
 
     private handleMissionChange(payload: any) {
         const { eventType, new: newRecord, old: oldRecord } = payload;
 
-        switch (eventType) {
-            case 'INSERT':
-                this.missionStore.addMission(newRecord as Mission);
-                break;
-            case 'UPDATE':
-                this.missionStore.updateMissionRealtime(newRecord as Mission);
-                break;
-            case 'DELETE':
-                this.missionStore.removeMission(oldRecord.id);
-                break;
+        if (eventType === 'INSERT') {
+            this.missionStore.missions.push(newRecord as Mission);
+        } else if (eventType === 'UPDATE') {
+            const index = this.missionStore.missions.findIndex(m => m.id === newRecord.id);
+            if (index !== -1) {
+                this.missionStore.missions[index] = newRecord as Mission;
+            }
+        } else if (eventType === 'DELETE') {
+            const index = this.missionStore.missions.findIndex(m => m.id === oldRecord.id);
+            if (index !== -1) {
+                this.missionStore.missions.splice(index, 1);
+            }
         }
     }
 
@@ -107,10 +124,30 @@ export class RealtimeService {
     }
 
     private handleAchievementChange(payload: any) {
-        const { eventType, new: newRecord } = payload;
+        const { eventType, new: newRecord, old: oldRecord } = payload;
 
-        if (eventType === 'INSERT' || eventType === 'UPDATE') {
-            this.gamificationStore.updateAchievement(newRecord);
+        if (eventType === 'INSERT') {
+            const achievement = {
+                ...newRecord,
+                task_id: newRecord.task_id || 0,
+                unlocked_at: newRecord.unlocked_at || new Date().toISOString()
+            };
+            this.gamificationStore.userAchievements.push(achievement);
+        } else if (eventType === 'UPDATE') {
+            const index = this.gamificationStore.userAchievements.findIndex(a => a.id === newRecord.id);
+            if (index !== -1) {
+                const achievement = {
+                    ...newRecord,
+                    task_id: newRecord.task_id || 0,
+                    unlocked_at: newRecord.unlocked_at || new Date().toISOString()
+                };
+                this.gamificationStore.userAchievements[index] = achievement;
+            }
+        } else if (eventType === 'DELETE') {
+            const index = this.gamificationStore.userAchievements.findIndex(a => a.id === oldRecord.id);
+            if (index !== -1) {
+                this.gamificationStore.userAchievements.splice(index, 1);
+            }
         }
     }
 

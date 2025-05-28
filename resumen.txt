@@ -1,0 +1,108 @@
+1. Frontend (Vue.js)
+
+Estructura de carpetas principales
+
+src/components/gamification/: Componentes relacionados con la gamificación (perfil, estadísticas, misiones, logros, simulador de acciones, etc).
+
+src/components/profile/: Componentes del perfil de usuario.
+
+src/components/ui/: Componentes reutilizables de interfaz.
+
+src/services/: Servicios para interactuar con la API/Supabase (gamificación, tareas, misiones, autenticación, etc).
+
+src/stores/: Pinia stores para el manejo de estado global (usuario, tareas, misiones, gamificación, etc).
+
+src/types/: Definiciones TypeScript de los modelos principales (usuario, tarea, misión, logro, categoría, etc).
+
+src/views/: Vistas principales de la aplicación (por ejemplo, la vista de gamificación).
+
+Gestión de Estado
+
+Se utiliza Pinia para manejar el estado global de usuario, tareas, misiones, progreso, logros y gamificación.
+
+Los stores se actualizan en tiempo real gracias a las suscripciones de Supabase (realtime.service.ts).
+
+Servicios
+
+Abstracción de lógica de comunicación con Supabase: operaciones CRUD y lógica de negocio (actualización de progreso, obtención de logros, subida de nivel, etc).
+
+Componentes de Gamificación
+
+UserProfile.vue: Muestra el perfil del usuario y su progreso.
+
+UserStats.vue: Estadísticas del usuario (sabiduría, carisma, etc).
+
+ActiveMissions.vue: Lista misiones activas del usuario.
+
+Achievements.vue: Muestra logros obtenidos.
+
+ActionSimulator.vue: Simula acciones para testear el sistema de gamificación.
+
+2. Backend (Supabase/Postgres)
+
+Tablas principales
+
+users: Información básica del usuario.
+
+tasks: Tareas disponibles para los usuarios.
+
+task_stats_map: Relación entre tareas y estadísticas (sabiduría, carisma, etc).
+
+missions: Misiones que agrupan tareas y logros.
+
+user_missions: Progreso del usuario en misiones.
+
+user_task_progress: Progreso en tareas individuales.
+
+achievements: Logros que se pueden obtener.
+
+user_achievements: Logros obtenidos por el usuario.
+
+user_levels: Nivel y XP del usuario.
+
+user_stats: Estadísticas del usuario.
+
+xp_log: Registro detallado de obtención de XP.
+
+Lógica de gamificación
+
+Completar tareas actualiza progreso y puede otorgar logros.
+
+Los logros desbloqueados otorgan XP, registrados en xp_log.
+
+XP acumulado puede causar un nivel superior (user_levels).
+
+Las estadísticas se ajustan en base al mapeo de tareas (task_stats_map).
+
+Las misiones tienen requisitos específicos y pueden desbloquear logros.
+
+Supabase permite reactividad total con suscripciones en tiempo real.
+
+3. Integración y flujo general
+
+El usuario realiza una acción (tarea).
+
+Se actualiza el progreso de la tarea.
+
+Se comprueba si se cumplen condiciones de logros.
+
+Si se desbloquea un logro, se añade a user_achievements y se registra XP en xp_log.
+
+Se evalúa si se alcanza un nuevo nivel (user_levels).
+
+Se actualizan estadísticas del usuario (user_stats).
+
+El frontend refleja los cambios en tiempo real.
+
+El usuario puede visualizar toda su evolución desde la interfaz.
+
+4. Puntos fuertes y consideraciones
+
+Arquitectura modular y limpia: Servicios, stores, tipos y componentes bien separados.
+
+Actualización en tiempo real: Gracias a Supabase, toda la app es reactiva.
+
+Alta escalabilidad: Fácil agregar nuevos logros, misiones, estadísticas o tareas.
+
+Auditoría completa: xp_log permite saber cómo se obtuvo cada punto de XP.
+

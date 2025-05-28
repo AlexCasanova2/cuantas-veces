@@ -1,12 +1,10 @@
-import '/src/assets/main.css'
-
-console.log('>>> [main.ts] App y CSS importados');
-
-import { createApp } from 'vue'
+import { createApp } from '@vue/runtime-dom'
 import { createPinia } from 'pinia'
-
 import App from './App.vue'
 import router from './router'
+import './assets/main.css'
+
+console.log('>>> [main.ts] App y CSS importados');
 
 const app = createApp(App)
 

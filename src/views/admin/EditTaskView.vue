@@ -164,6 +164,7 @@ import { useTaskStore } from '../../stores/task.store';
 import { useCategoryStore } from '../../stores/category.store';
 import CategoryManager from '../../components/CategoryManager.vue';
 import type { Task } from '../../types/task';
+import type { CreateTaskDTO } from '../../types/task';
 
 const route = useRoute();
 const router = useRouter();
@@ -173,12 +174,12 @@ const categoryStore = useCategoryStore();
 const task = ref<Task | null>(null);
 const showCategoryManager = ref(false);
 
-const taskForm = ref({
+const taskForm = ref<CreateTaskDTO>({
     title: '',
     description: '',
     category_id: 0,
-    state: 'draft' as const,
-    achievements: [] as { title: string; description: string; requirement: number }[]
+    state: 'draft',
+    achievements: []
 });
 
 onMounted(async () => {
@@ -188,35 +189,36 @@ onMounted(async () => {
     ]);
 });
 
-async function loadTask() {
+const loadTask = async () => {
+    if (!task.value?.id) return;
+
     try {
-        const taskId = Number(route.params.id);
-        const loadedTask = await taskStore.getTask(taskId);
+        const loadedTask = await taskStore.getTask(task.value.id!);
         if (loadedTask) {
-            task.value = loadedTask;
             taskForm.value = {
                 title: loadedTask.title,
-                description: loadedTask.description,
+                description: loadedTask.description || '',
                 category_id: loadedTask.category_id,
                 state: loadedTask.state,
-                achievements: loadedTask.achievements.map(a => ({
+                achievements: loadedTask.achievements?.map(a => ({
                     title: a.title,
-                    description: a.description,
-                    requirement: Number(a.requirement)
-                }))
+                    description: a.description || '',
+                    requirement: a.requirement,
+                    xp_reward: a.xp_reward
+                })) || []
             };
         }
     } catch (error) {
         console.error('Error al cargar la tarea:', error);
-        router.push('/admin');
     }
-}
+};
 
 function addAchievement() {
     taskForm.value.achievements.push({
         title: '',
         description: '',
-        requirement: 1
+        requirement: 1,
+        xp_reward: 0
     });
 }
 
@@ -225,7 +227,7 @@ function removeAchievement(index: number) {
 }
 
 async function handleSubmit() {
-    if (!task.value) return;
+    if (!task.value?.id) return;
 
     try {
         await taskStore.updateTask(task.value.id!, taskForm.value);

@@ -1,0 +1,108 @@
+/* Estilos para el Panel de Administración */
+
+
+#app {
+    width: 100% !important;
+    display: block;
+    max-width: none;
+    padding: 0px;
+}
+
+/* Contenedor principal */
+.admin-container {
+    @apply min-h-screen bg-gray-50 dark:bg-gray-900 p-6;
+}
+
+.admin-content {
+    @apply max-w-4xl mx-auto;
+}
+
+.admin-card {
+    @apply bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm;
+}
+
+/* Encabezado */
+.admin-header {
+    @apply flex justify-between items-center mb-6;
+}
+
+.admin-title {
+    @apply text-2xl font-bold text-gray-900 dark:text-white;
+}
+
+.admin-subtitle {
+    @apply text-gray-600 dark:text-gray-400 mt-1;
+}
+
+/* Botones de acción */
+.admin-button-group {
+    @apply flex gap-2;
+}
+
+.admin-button-primary {
+    @apply px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors dark:bg-blue-500 dark:hover:bg-blue-600;
+}
+
+.admin-button-success {
+    @apply px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors dark:bg-green-500 dark:hover:bg-green-600;
+}
+
+/* Listas */
+.admin-list {
+    @apply mb-8;
+}
+
+.admin-list-title {
+    @apply text-xl font-semibold text-gray-900 dark:text-white mb-4;
+}
+
+.admin-list-items {
+    @apply space-y-4;
+}
+
+/* Items de lista */
+.admin-list-item {
+    @apply flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors;
+}
+
+.admin-list-item-content {
+    @apply flex-1;
+}
+
+.admin-list-item-title {
+    @apply font-medium text-gray-900 dark:text-white;
+}
+
+.admin-list-item-description {
+    @apply text-sm text-gray-600 dark:text-gray-400;
+}
+
+.admin-list-item-meta {
+    @apply mt-2 flex items-center gap-2;
+}
+
+/* Badges */
+.admin-badge {
+    @apply text-xs px-2 py-1 rounded-full;
+}
+
+.admin-badge-category {
+    @apply text-xs px-2 py-1 rounded-full;
+}
+
+.admin-badge-state {
+    @apply text-xs px-2 py-1 rounded-full bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300;
+}
+
+/* Botones de acción en items */
+.admin-item-actions {
+    @apply flex gap-2;
+}
+
+.admin-button-edit {
+    @apply px-3 py-1 text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300;
+}
+
+.admin-button-delete {
+    @apply px-3 py-1 text-sm text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300;
+} 

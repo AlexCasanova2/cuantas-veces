@@ -106,9 +106,9 @@ const userStore = useUserStore();
 const avatarPreview = ref<string | null>(null);
 
 const form = ref({
-    name: userStore.profile?.name || '',
-    email: userStore.user?.email || '',
-    bio: userStore.profile?.bio || '',
+    name: '',
+    email: '',
+    bio: '',
     avatar: null as File | null,
     removeAvatar: false
 });
@@ -142,20 +142,20 @@ function removeAvatar() {
     avatarPreview.value = null;
 }
 
-async function handleSubmit() {
+const handleSubmit = async () => {
     try {
-        await userStore.updateProfile({
+        const formData = {
             name: form.value.name,
             bio: form.value.bio,
-            avatar: form.value.avatar,
+            avatar: form.value.avatar || undefined,
             removeAvatar: form.value.removeAvatar
-        });
-        emit('update');
-        close();
+        };
+        await userStore.updateProfile(formData);
+        emit('close');
     } catch (error) {
         console.error('Error al actualizar el perfil:', error);
     }
-}
+};
 
 function close() {
     emit('close');

@@ -6,7 +6,7 @@
         <div class="flex justify-between items-center">
           <div>
             <h1 class="text-2xl font-bold text-dark">Mi Perfil</h1>
-            <h2 class="text-3xl font-bold text-dark">{{ userStore.profile?.name }}</h2>
+            <!-- <h2 class="text-3xl font-bold text-dark">{{ userStore.profile?.name }}</h2> -->
           </div>
           <!-- Iconos de notificación y perfil -->
           <div class="flex items-center gap-3">

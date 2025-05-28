@@ -44,8 +44,10 @@ export const useAuthStore = defineStore('auth', () => {
 
                 if (profileError) throw profileError;
                 profile.value = profileData;
+                console.log('>>> [AuthStore] Perfil de usuario cargado:', JSON.parse(JSON.stringify(profileData)));
             } else {
                 profile.value = null;
+                console.log('>>> [AuthStore] No hay sesión de usuario, perfil establecido a null');
             }
 
             return session;
@@ -124,16 +126,14 @@ export const useAuthStore = defineStore('auth', () => {
     }
 
     async function signInWithGoogle() {
-        isLoading.value = true;
-        error.value = null;
         try {
-            const { data } = await authService.signInWithGoogle();
-            // La redirección la maneja Supabase
-        } catch (e) {
-            error.value = e instanceof Error ? e.message : 'Error al iniciar sesión con Google';
-            throw e;
-        } finally {
-            isLoading.value = false;
+            const response = await authService.signInWithGoogle();
+            if (response?.url) {
+                window.location.href = response.url;
+            }
+        } catch (error) {
+            console.error('Error al iniciar sesión con Google:', error);
+            throw error;
         }
     }
 

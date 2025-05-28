@@ -1,4 +1,4 @@
-import type { Category } from '../types/task';
+import type { Category, CreateCategoryDTO, UpdateCategoryDTO } from '../types/category';
 import { supabase } from './supabase';
 
 export async function fetchCategories(): Promise<Category[]> {
@@ -11,10 +11,22 @@ export async function fetchCategories(): Promise<Category[]> {
   return data || [];
 }
 
-export async function createCategory(category: Omit<Category, 'id'>): Promise<Category> {
+export async function createCategory(category: CreateCategoryDTO): Promise<Category> {
   const { data, error } = await supabase
     .from('categories')
     .insert([category])
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function updateCategory(id: number, category: UpdateCategoryDTO): Promise<Category> {
+  const { data, error } = await supabase
+    .from('categories')
+    .update(category)
+    .eq('id', id)
     .select()
     .single();
 

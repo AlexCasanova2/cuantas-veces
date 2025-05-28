@@ -57,7 +57,7 @@
                                         </button>
                                     </div>
 
-                                    <div v-for="(req, index) in missionForm.achievementRequirements" :key="index"
+                                    <div v-for="(req, index) in missionForm.achievement_requirements" :key="index"
                                         class="mb-4 p-4 border rounded-lg">
                                         <div class="flex justify-between items-start mb-2">
                                             <h4 class="text-sm font-medium text-gray-700">Logro {{ index + 1 }}</h4>
@@ -70,7 +70,7 @@
                                         <div class="space-y-3">
                                             <div>
                                                 <label class="block text-xs text-gray-600">Tarea</label>
-                                                <select v-model="req.taskId" required @change="handleTaskChange(index)"
+                                                <select v-model="req.taskId" required @change="updateAchievementId(index, req.achievementId)"
                                                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                                                     <option value="">Selecciona una tarea</option>
                                                     <option v-for="task in tasks" :key="task.id" :value="task.id">
@@ -132,25 +132,24 @@ const missionForm = ref<CreateMissionDTO>({
     description: '',
     state: 'draft',
     requirement: [],
-    achievementRequirements: [],
-    xp_reward: 0
+    achievement_requirements: [],
+    xp_reward: 100
 });
 
 function addAchievementRequirement() {
-    missionForm.value.achievementRequirements?.push({
+    missionForm.value.achievement_requirements.push({
         taskId: 0,
         achievementId: 0
     });
 }
 
 function removeAchievementRequirement(index: number) {
-    missionForm.value.achievementRequirements?.splice(index, 1);
+    missionForm.value.achievement_requirements.splice(index, 1);
 }
 
-function handleTaskChange(index: number) {
-    // Resetear el logro seleccionado cuando cambia la tarea
-    if (missionForm.value.achievementRequirements) {
-        missionForm.value.achievementRequirements[index].achievementId = 0;
+function updateAchievementId(index: number, achievementId: number) {
+    if (missionForm.value.achievement_requirements) {
+        missionForm.value.achievement_requirements[index].achievementId = achievementId;
     }
 }
 
@@ -170,9 +169,8 @@ async function loadTasks() {
 
 async function handleSubmit() {
     try {
-        // Validar que se hayan seleccionado tareas y logros
-        if (missionForm.value.achievementRequirements?.some(req => !req.taskId || !req.achievementId)) {
-            alert('Por favor, selecciona una tarea y un logro para cada requisito');
+        if (!validateForm()) {
+            alert('Por favor, completa todos los campos y selecciona una tarea y un logro para cada requisito');
             return;
         }
 
@@ -182,6 +180,18 @@ async function handleSubmit() {
         console.error('Error al crear la misión:', error);
     }
 }
+
+const validateForm = () => {
+    if (!missionForm.value.title || !missionForm.value.description) {
+        return false;
+    }
+
+    if (missionForm.value.achievement_requirements?.some(req => !req.taskId || !req.achievementId)) {
+        return false;
+    }
+
+    return true;
+};
 
 onMounted(() => {
     loadTasks();

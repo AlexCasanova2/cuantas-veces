@@ -84,3 +84,9 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* Prevenir zoom en dispositivos táctiles */
+html {
+  touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
+}

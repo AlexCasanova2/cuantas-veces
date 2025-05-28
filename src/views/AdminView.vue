@@ -551,14 +551,16 @@ import { useTaskStore } from '../stores/task.store';
 import { useMissionStore } from '../stores/mission.store';
 import { useCategoryStore } from '../stores/category.store';
 import CategoryManager from '../components/CategoryManager.vue';
-import type { Task, CreateTaskDTO } from '../types/task';
+import type { Task, CreateTaskDTO, UpdateTaskDTO } from '../types/task';
 import type { Mission, CreateMissionDTO, MissionRequirement } from '../types/mission';
 import type { Category } from '../types/category';
+import { useRouter } from 'vue-router';
 
 const authStore = useAuthStore();
 const taskStore = useTaskStore();
 const missionStore = useMissionStore();
 const categoryStore = useCategoryStore();
+const router = useRouter();
 
 const showCreateTaskModal = ref(false);
 const showCreateMissionModal = ref(false);
@@ -636,10 +638,11 @@ function getStateText(state: string) {
 }
 
 function addAchievement() {
-  taskForm.value.achievements.push({
+  taskForm.value.achievements?.push({
     title: '',
     description: '',
-    requirement: 1
+    requirement: 1,
+    xp_reward: 0
   });
 }
 
@@ -693,29 +696,24 @@ function closeMissionModal() {
 }
 
 async function handleSubmit() {
+  if (!editingTask.value?.id) return;
   try {
-    if (editingTask.value) {
-      // Simplificamos la actualización para que coincida con el backend
-      const taskToUpdate = {
-        title: taskForm.value.title,
-        description: taskForm.value.description,
-        category_id: taskForm.value.category_id,
-        state: taskForm.value.state,
-        achievements: taskForm.value.achievements.map(achievement => ({
-          title: achievement.title,
-          description: achievement.description || '',
-          requirement: achievement.requirement
-        }))
-      };
-
-      await taskStore.updateTask(editingTask.value.id, taskToUpdate);
-      await taskStore.fetchTasks();
-    } else {
-      await taskStore.createTask(taskForm.value);
-    }
-    closeTaskModal();
+    const taskToUpdate: UpdateTaskDTO = {
+      title: taskForm.value.title,
+      description: taskForm.value.description,
+      category_id: taskForm.value.category_id,
+      state: taskForm.value.state,
+      achievements: taskForm.value.achievements?.map(achievement => ({
+        title: achievement.title,
+        description: achievement.description || '',
+        requirement: achievement.requirement,
+        xp_reward: achievement.xp_reward || 0
+      }))
+    };
+    await taskStore.updateTask(editingTask.value.id, taskToUpdate);
+    router.push('/admin');
   } catch (error) {
-    console.error('Error al guardar la tarea:', error);
+    console.error('Error al actualizar la tarea:', error);
   }
 }
 
@@ -747,8 +745,9 @@ function editTask(task: Task) {
     achievements: task.achievements ? task.achievements.map(a => ({
       id: a.id,
       title: a.title,
-      description: a.description,
-      requirement: Number(a.requirement)
+      description: a.description || '',
+      requirement: a.requirement,
+      xp_reward: a.xp_reward
     })) : []
   };
   showCreateTaskModal.value = true;

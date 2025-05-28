@@ -212,9 +212,10 @@ import { useRoute, useRouter } from 'vue-router';
 import { useTaskStore } from '../stores/task.store';
 import { useUserStore } from '../stores/user.store';
 import { useGamificationStore } from '../stores/gamification.store';
-import type { TaskWithProgress, Category } from '../types/task';
-import * as taskService from '../services/task.service';
 import { useCategoryStore } from '../stores/category.store';
+import type { TaskWithProgress } from '../types/task';
+import type { Category } from '../types/category';
+import * as taskService from '../services/task.service';
 import confetti from 'canvas-confetti';
 
 // Declaración del módulo canvas-confetti
@@ -235,6 +236,7 @@ const progressBarRef = ref<HTMLElement | null>(null);
 const showFloatingText = ref(false);
 const animatedBorder = ref<HTMLElement | null>(null);
 const previousCompletedAchievementIds = ref<number[]>([]);
+const category = ref<Category | null>(null);
 
 // Computed para obtener el próximo logro disponible
 const nextAchievement = computed(() => {
@@ -270,48 +272,29 @@ watch(() => task.value?.completedAchievementIds, (newIds, oldIds) => {
   }
 }, { deep: true });
 
-async function fetchTaskDetail(id: number) {
-  if (!userStore.user) {
-    router.push('/');
-    return;
-  }
-
-  error.value = null;
+async function fetchTaskDetail(taskId: number) {
   try {
     const tasks = await taskService.fetchTasks();
-    const foundTask = tasks.find(t => t.id === id);
-
+    const foundTask = tasks.find(t => t.id === taskId);
     if (foundTask) {
-      const userProgress = await taskService.fetchUserTaskProgress(userStore.user.id, [id]);
-      const userAchievements = await taskService.fetchUserAchievements(userStore.user.id);
+      const completedAchievementIds = gamificationStore.userAchievements
+        .filter(ua => ua.task_id === foundTask.id)
+        .map(ua => ua.id);
 
-      const progress = userProgress[0] || { count: 0, progress: 0 };
-      const completedAchievementIds = userAchievements
-        .filter(ua => foundTask.achievements?.some(ach => ach.id === ua.achievement_id))
-        .map(ua => ua.achievement_id);
-
-      const category = categoryStore.categories.find((cat: Category) => cat.id === foundTask.category_id);
+      const foundCategory = categoryStore.categories.find(cat => cat.id === foundTask.category_id);
+      const category = foundCategory || { id: 0, name: 'Sin categoría', color: '#000000', created_at: '', updated_at: '' };
 
       task.value = {
         ...foundTask,
-        count: progress.count,
-        progress: progress.progress,
+        progress: 0,
+        count: 0,
         completedAchievementIds,
-        category: category || { id: 0, name: 'Sin categoría', created_at: '', updated_at: '' }
+        category
       };
-
-      // Reiniciar la animación de la barra de progreso
-      if (progressBarRef.value) {
-        progressBarRef.value.style.animation = 'none';
-        progressBarRef.value.offsetHeight; // Forzar reflow
-        progressBarRef.value.style.animation = 'progressFill 1s ease-out forwards';
-      }
-    } else {
-      error.value = 'Tarea no encontrada';
     }
-  } catch (e) {
-    error.value = e instanceof Error ? e.message : 'Error desconocido';
-    console.error('Error al cargar la tarea:', e);
+  } catch (error) {
+    console.error('Error al cargar la tarea:', error);
+    router.push('/');
   }
 }
 
@@ -419,6 +402,10 @@ onMounted(async () => {
 
   if (taskId.value) {
     await fetchTaskDetail(taskId.value);
+  }
+
+  if (task.value?.category_id) {
+    category.value = categoryStore.categories.find(cat => cat.id === task.value?.category_id) || null;
   }
 
   startBorderAnimation();

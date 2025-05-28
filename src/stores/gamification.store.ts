@@ -80,7 +80,7 @@ export const useGamificationStore = defineStore('gamification', () => {
       // Capturar la respuesta de la llamada RPC
       const result = await gamificationService.registerUserAction(userId, taskId);
       console.log('>>> [GamificationStore] Respuesta de register_user_action RPC:', result);
-
+      
       // Actualizar el estado del store con los nuevos datos de gamificación
       // Esto incluirá el nivel y la XP actualizada que vienen en la respuesta RPC
       // y recargará otros datos como misiones y logros del usuario.

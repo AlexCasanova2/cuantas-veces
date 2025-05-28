@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import * as categoryService from '../services/category.service';
-import type { Category } from '../types/task';
+import type { Category, CreateCategoryDTO, UpdateCategoryDTO } from '../types/category';
 
 export const useCategoryStore = defineStore('category', {
   state: () => ({
@@ -25,7 +25,7 @@ export const useCategoryStore = defineStore('category', {
       }
     },
 
-    async createCategory(category: Omit<Category, 'id'>) {
+    async createCategory(category: CreateCategoryDTO) {
       this.loading = true;
       this.error = null;
       try {
@@ -34,6 +34,24 @@ export const useCategoryStore = defineStore('category', {
         return newCategory;
       } catch (error) {
         this.error = error instanceof Error ? error.message : 'Error al crear la categoría';
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async updateCategory(id: number, category: UpdateCategoryDTO) {
+      this.loading = true;
+      this.error = null;
+      try {
+        const updatedCategory = await categoryService.updateCategory(id, category);
+        const index = this.categories.findIndex(cat => cat.id === id);
+        if (index !== -1) {
+          this.categories[index] = updatedCategory;
+        }
+        return updatedCategory;
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : 'Error al actualizar la categoría';
         throw error;
       } finally {
         this.loading = false;

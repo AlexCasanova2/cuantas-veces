@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
-import type { Task, CreateTaskDTO, UpdateUserTaskProgressDTO, Achievement, Category, UserTaskProgress, UserAchievement } from '../types/task';
+import type { Task, CreateTaskDTO, UpdateUserTaskProgressDTO, Achievement, UserTaskProgress, UserAchievement, UpdateTaskDTO } from '../types/task';
+import type { Category } from '../types/category';
 
 export async function fetchTasks() {
   const { data, error } = await supabase
@@ -50,41 +51,30 @@ export async function fetchUserAchievements(user_id: string): Promise<UserAchiev
 }
 
 export async function createTask(task: CreateTaskDTO): Promise<Task> {
-  // Primero obtenemos el nombre de la categoría
-  const { data: category, error: categoryError } = await supabase
-    .from('categories')
-    .select('name')
-    .eq('id', task.category_id)
-    .single();
+  console.log('Iniciando creación de tarea:', task);
+  try {
+    const { data, error } = await supabase
+      .from('tasks')
+      .insert({
+        title: task.title,
+        description: task.description,
+        category_id: task.category_id,
+        state: task.state
+      })
+      .select()
+      .single();
 
-  if (categoryError) {
-    console.error('Error al obtener la categoría:', categoryError);
-    throw categoryError;
-  }
+    if (error) {
+      console.error('Error en la creación de la tarea:', error);
+      throw error;
+    }
 
-  // Creamos la tarea con ambas columnas de categoría
-  const { data: newTask, error: taskError } = await supabase
-    .from('tasks')
-    .insert([{
-      title: task.title,
-      description: task.description,
-      category_id: task.category_id,
-      category: category.name, // Añadimos el nombre de la categoría
-      state: task.state
-    }])
-    .select()
-    .single();
+    console.log('Tarea creada en la base de datos:', data);
 
-  if (taskError) {
-    console.error('Error al crear la tarea:', taskError);
-    throw taskError;
-  }
-
-  // Si hay logros, los creamos en una transacción separada
-  if (task.achievements && task.achievements.length > 0) {
-    try {
+    // Crear los logros si existen
+    if (task.achievements && task.achievements.length > 0) {
       const achievements = task.achievements.map(achievement => ({
-        task_id: newTask.id,
+        task_id: data.id,
         title: achievement.title,
         description: achievement.description,
         requirement: achievement.requirement,
@@ -97,41 +87,15 @@ export async function createTask(task: CreateTaskDTO): Promise<Task> {
 
       if (achievementsError) {
         console.error('Error al crear los logros:', achievementsError);
-        // Si falla la creación de logros, eliminamos la tarea
-        await supabase
-          .from('tasks')
-          .delete()
-          .eq('id', newTask.id);
         throw achievementsError;
       }
-    } catch (error) {
-      console.error('Error en la transacción de logros:', error);
-      // Si hay cualquier error, eliminamos la tarea
-      await supabase
-        .from('tasks')
-        .delete()
-        .eq('id', newTask.id);
-      throw error;
     }
+
+    return data;
+  } catch (error) {
+    console.error('Error en createTask:', error);
+    throw error;
   }
-
-  // Obtenemos la tarea completa con sus logros
-  const { data: completeTask, error: fetchError } = await supabase
-    .from('tasks')
-    .select(`
-      *,
-      achievements (*),
-      categories!inner (id, name, color)
-    `)
-    .eq('id', newTask.id)
-    .single();
-
-  if (fetchError) {
-    console.error('Error al obtener la tarea completa:', fetchError);
-    throw fetchError;
-  }
-
-  return completeTask as Task;
 }
 
 export async function addUserAchievement(user_id: string, achievement_id: number): Promise<UserAchievement> {
@@ -356,7 +320,7 @@ export async function getTasksByCategory(categoryId: number) {
   return data as Task[];
 }
 
-export async function updateTask(id: number, task: Partial<Task>): Promise<Task> {
+export async function updateTask(id: number, task: UpdateTaskDTO): Promise<Task> {
   try {
     console.log('>>> [updateTask] Iniciando actualización de tarea:', { id, task });
 
@@ -376,13 +340,13 @@ export async function updateTask(id: number, task: Partial<Task>): Promise<Task>
 
     // Actualizamos la tarea
     const { error: updateError } = await supabase
-      .from('tasks')
-      .update({
-        title: task.title,
-        description: task.description,
+    .from('tasks')
+    .update({
+      title: task.title,
+      description: task.description,
         category_id: task.category_id,
         state: task.state
-      })
+    })
       .eq('id', id);
 
     if (updateError) {
@@ -477,17 +441,17 @@ export async function updateTask(id: number, task: Partial<Task>): Promise<Task>
     console.log('>>> [updateTask] Obteniendo tarea actualizada con relaciones');
     const { data: updatedTask, error: fetchError } = await supabase
       .from('tasks')
-      .select(`
-        *,
-        achievements (*),
+    .select(`
+      *,
+      achievements (*),
         categories (
           id,
           name,
           color
         )
-      `)
+    `)
       .eq('id', id)
-      .single();
+    .single();
 
     if (fetchError) {
       console.error('>>> [updateTask] Error al obtener la tarea actualizada:', fetchError);
@@ -527,4 +491,59 @@ export async function addAchievementsToTask(taskId: number, achievements: { titl
     console.error('Error en addAchievementsToTask:', error);
     throw error;
   }
+}
+
+export async function restoreTask(id: number): Promise<Task> {
+  const { data, error } = await supabase
+    .from('tasks')
+    .update({ state: 'published' })
+    .eq('id', id)
+    .select(`
+      *,
+      achievements (*),
+      categories!inner (id, name, color)
+    `)
+    .single();
+
+  if (error) {
+    console.error('Error al restaurar la tarea:', error);
+    throw error;
+  }
+
+  return data as Task;
+}
+
+export async function addAchievementToTask(taskId: number, achievement: Omit<Achievement, 'id' | 'created_at' | 'updated_at'>): Promise<Achievement> {
+  const { data, error } = await supabase
+    .from('achievements')
+    .insert({
+      task_id: taskId,
+      title: achievement.title,
+      description: achievement.description,
+      requirement: achievement.requirement,
+      xp_reward: achievement.xp_reward
+    })
+    .select()
+    .single();
+  if (error) throw error;
+  return data as Achievement;
+}
+
+export async function updateAchievement(achievementId: number, achievement: Partial<Achievement>): Promise<Achievement> {
+  const { data, error } = await supabase
+    .from('achievements')
+    .update(achievement)
+    .eq('id', achievementId)
+    .select()
+    .single();
+  if (error) throw error;
+  return data as Achievement;
+}
+
+export async function deleteAchievement(achievementId: number): Promise<void> {
+  const { error } = await supabase
+    .from('achievements')
+    .delete()
+    .eq('id', achievementId);
+  if (error) throw error;
 } 

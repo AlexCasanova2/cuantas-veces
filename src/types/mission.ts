@@ -10,15 +10,15 @@ export interface AchievementRequirement {
 }
 
 export interface Mission {
-  id?: number;
+  id: number;
   title: string;
   description: string;
   state: 'draft' | 'published' | 'deleted';
   requirement: MissionRequirement[];
   achievement_requirements: AchievementRequirement[];
   xp_reward: number;
-  created_at?: string;
-  updated_at?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface CreateMissionDTO {
@@ -28,4 +28,23 @@ export interface CreateMissionDTO {
   requirement: MissionRequirement[];
   achievement_requirements: AchievementRequirement[];
   xp_reward: number;
+}
+
+export interface UpdateMissionDTO {
+  title?: string;
+  description?: string;
+  state?: 'draft' | 'published' | 'deleted';
+  requirement?: MissionRequirement[];
+  achievement_requirements?: AchievementRequirement[];
+  xp_reward?: number;
+}
+
+export interface UserMission {
+  id: number;
+  user_id: string;
+  mission_id: number;
+  progress: number;
+  completed_at?: string;
+  created_at: string;
+  updated_at: string;
 } 

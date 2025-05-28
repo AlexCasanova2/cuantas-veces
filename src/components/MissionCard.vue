@@ -19,7 +19,7 @@
                     </div>
                     <div class="w-full bg-gray-200 rounded-full h-2">
                         <div class="bg-indigo-600 h-2 rounded-full transition-all duration-300"
-                            :style="{ width: `${((userMissionState?.progress?.[key] || 0) / value) * 100}%` }"></div>
+                            :style="{ width: `${((Number(userMissionState?.progress?.[key]) || 0) / Number(value)) * 100}%` }"></div>
                     </div>
                 </div>
             </div>
@@ -39,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Mission } from '../services/mission.service';
+import type { Mission } from '../types/mission';
 import type { UserMission } from '../services/userMission.service';
 
 defineProps<{

@@ -109,22 +109,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from '@vue/runtime-core';
+import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useMissionStore } from '../../stores/mission.store';
-import type { Mission, MissionRequirement } from '../../types/mission';
+import type { Mission, MissionRequirement, AchievementRequirement } from '../../types/mission';
 
 const route = useRoute();
 const router = useRouter();
 const missionStore = useMissionStore();
 
 const mission = ref<Mission | null>(null);
-
 const missionForm = ref({
     title: '',
     description: '',
-    state: 'draft' as const,
+    state: 'draft' as 'draft' | 'published' | 'deleted',
     requirement: [] as MissionRequirement[],
+    achievement_requirements: [] as AchievementRequirement[],
     xp_reward: 0
 });
 
@@ -135,18 +135,16 @@ onMounted(async () => {
 async function loadMission() {
     try {
         const missionId = Number(route.params.id);
-        const loadedMission = await missionStore.getMission(missionId);
+        const missions = await missionStore.fetchMissions();
+        const loadedMission = missions.find((m: Mission) => m.id === missionId);
         if (loadedMission) {
             mission.value = loadedMission;
             missionForm.value = {
                 title: loadedMission.title,
                 description: loadedMission.description,
                 state: loadedMission.state,
-                requirement: loadedMission.requirement.map((r: MissionRequirement) => ({
-                    title: r.title,
-                    description: r.description,
-                    requirement: Number(r.requirement)
-                })),
+                requirement: loadedMission.requirement,
+                achievement_requirements: loadedMission.achievement_requirements,
                 xp_reward: loadedMission.xp_reward
             };
         }
@@ -169,10 +167,16 @@ function removeRequirement(index: number) {
 }
 
 async function handleSubmit() {
-    if (!mission.value) return;
-
+    if (!mission.value?.id) return;
     try {
-        await missionStore.updateMission(mission.value.id!, missionForm.value);
+        await missionStore.updateMission(mission.value.id, {
+            title: missionForm.value.title,
+            description: missionForm.value.description,
+            state: missionForm.value.state,
+            requirement: missionForm.value.requirement,
+            achievement_requirements: missionForm.value.achievement_requirements,
+            xp_reward: missionForm.value.xp_reward
+        });
         router.push('/admin');
     } catch (error) {
         console.error('Error al actualizar la misión:', error);

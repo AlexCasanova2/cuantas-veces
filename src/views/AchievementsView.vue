@@ -151,7 +151,7 @@ const totalAchievements = computed(() => {
 });
 
 function getUnlockDate(achievementId: number): string {
-  const achievement = gamificationStore.achievements.find((a: Achievement & { unlocked_at: string }) => a.id === achievementId);
+  const achievement = gamificationStore.userAchievements.find((a: Achievement & { unlocked_at: string }) => a.id === achievementId);
   if (!achievement?.unlocked_at) return '';
   return new Date(achievement.unlocked_at).toLocaleDateString();
 }
